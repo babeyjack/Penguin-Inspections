@@ -5,9 +5,9 @@ const bcrypt = require("bcryptjs");
 const db = require("../db/connection");
 
 GOOGLE_CLIENT_ID =
-  "126659444835-7if5ijts6b3m98ul68mo26dk67g57ej8.apps.googleusercontent.com";
-GOOGLE_CLIENT_SECRET = "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";
-const JWT_SECRET = "chris07111995";
+  process.env.GOOGLE_CLIENT_ID || "default_google_client_id";
+GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "default_google_client_secret";
+const JWT_SECRET = process.env.JWT_SECRET || "default_jwt_secret";
 
 module.exports = function (passport) {
   // Local Strategy for login

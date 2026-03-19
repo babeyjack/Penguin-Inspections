@@ -45,7 +45,7 @@ const certificate = fs.readFileSync("ssl/cert.pem", "utf8");
 const FRONT_HTTP_PORT = Number(process.env.FRONT_HTTP_PORT) || 3001;
 const FRONT_HTTPS_PORT = Number(process.env.FRONT_HTTPS_PORT) || 3000;
 
-const credentials = { key: privateKey, passphrase: process.env.SSL_PASSPHRASE || "emilia28012004", cert: certificate };
+const credentials = { key: privateKey, passphrase: process.env.SSL_PASSPHRASE || "default_ssl_passphrase", cert: certificate };
 
 // Create the HTTPS server
 const httpsServer = https.createServer(credentials, app);

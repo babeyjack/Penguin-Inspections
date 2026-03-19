@@ -42,7 +42,7 @@ const certificate = fs.readFileSync("ssl/cert.pem", "utf8");
 const FRONTEND_URL = process.env.FRONTEND_URL || "https://localhost:3000";
 const BACK_HTTP_PORT = Number(process.env.BACK_HTTP_PORT) || 5001;
 const BACK_HTTPS_PORT = Number(process.env.BACK_HTTPS_PORT) || 5000;
-const SSL_PASSPHRASE = process.env.SSL_PASSPHRASE || "emilia28012004";
+const SSL_PASSPHRASE = process.env.SSL_PASSPHRASE || "default_ssl_passphrase";
 
 const credentials = { key: privateKey, passphrase: SSL_PASSPHRASE, cert: certificate };
 
