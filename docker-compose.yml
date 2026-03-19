@@ -1,0 +1,48 @@
+services:
+  frontend:
+    build: ./frontend
+    container_name: penguin-inspections-frontend
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - backend
+  backend:
+    build: ./backend
+    container_name: penguin-inspections-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+  db:
+    image: mysql:9.4
+    container_name: penguin-inspections-db
+    environment:
+      MYSQL_ROOT_PASSWORD: "Tr2pj7QL0cyxXyK"
+      MYSQL_DATABASE: "penguin_inspections"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "1mK^Hm:tGpZ60g?v0mD7dQ"
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./mySQL/grants.sql:/docker-entrypoint-initdb.d/01-grants.sql:ro
+      - ./mySQL/dev-seed-full.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  db_data:

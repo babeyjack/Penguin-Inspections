@@ -1,0 +1,16 @@
+FROM node:25.6-bookworm
+
+RUN apt-get update && apt-get upgrade -y
+
+COPY ./react-app /app/react-app
+COPY . /app
+
+RUN cd /app/react-app && npm install && npm run build
+RUN cd /app && npm install
+WORKDIR /app
+
+CMD if [ "${NODE_ENV}" = "DEV" ]; then npm run devStart; else npm run start; fi
+
+EXPOSE ${FRONT_HTTP_PORT} ${FRONT_HTTPS_PORT}
+
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD curl -f http://localhost:${FRONT_HTTP_PORT} || exit 1

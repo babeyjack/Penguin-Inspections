@@ -1,0 +1,17 @@
+
+services:
+  mysql:
+    image: mysql:9.4
+    container_name: penguin_inspections_db
+    environment:
+      MYSQL_ROOT_PASSWORD: "Tr2pj7QL0cyxXyK"
+      MYSQL_DATABASE: "penguin_inspections"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "1mK^Hm:tGpZ60g?v0mD7dQ"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:
