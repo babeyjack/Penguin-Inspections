@@ -93,7 +93,11 @@ db.beginTransaction = function(callback) {
       };
       
       // Call the transaction callback
-      callback(null);
+      if (typeof callback === 'function') {
+        callback(null);
+      } else {
+        console.warn("beginTransaction was called without a callback function.");
+      }
     });
   });
 };
