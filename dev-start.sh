@@ -5,7 +5,7 @@ echo "Stopping any running Docker Compose services..."
 docker compose down
 
 echo "Cleaning up MySQL data directory..."
-rm -rf /mySQL/data
+# rm -rf /mySQL/data
 
 # Check if .env exists and has NODE_ENV set to DEV
 if [ ! -f ".env" ]; then

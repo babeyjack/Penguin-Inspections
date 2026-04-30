@@ -46,8 +46,8 @@ router.get("/allCompanyClients/:domain", isAuthenticated, async (req, res) => {
             if (result.length > 0) {
               console.log(
                 "/rent/allCompanyClients/" +
-                  req.params.domain +
-                  " : Value Correct"
+                req.params.domain +
+                " : Value Correct"
               );
             }
 
@@ -218,5 +218,98 @@ router.delete(
     );
   }
 );
+
+router.get("/allCompanyEquipment/rentable/:domain", isAuthenticated, async (req, res) => {
+  console.log("/rent/deleteClient/" + req.params.domain + " : Accessed");
+  let domainId = 0;
+  db.query(
+    "SELECT id FROM company WHERE domain_name = ?",
+    [req.params.domain],
+    (domainErr, domainRes) => {
+      if (domainErr) {
+        console.log(
+          "/rent/allCompanyEquipment/rentable/" + req.params.domain + " : " + domainErr
+        );
+        return res.status(500).json({
+          status: 500,
+          message: "Domain Not Found",
+        });
+      }
+      if (domainRes.length > 0) {
+        domainId = domainRes[0].id;
+
+        try {
+          db.query(
+            "SELECT e.*, i.status, i.next_date, i.details FROM penguin_inspections.equipment e INNER JOIN penguin_inspections.company_equipment ce ON ce.equipment_id = e.id LEFT JOIN ( SELECT i1.*, ci1.company_id FROM penguin_inspections.inspection i1 INNER JOIN penguin_inspections.company_inspection ci1 ON ci1.inspection_id = i1.id INNER JOIN ( SELECT i.equipment_id, ci.company_id, MAX(i.date) AS earliest_date FROM penguin_inspections.inspection i INNER JOIN penguin_inspections.company_inspection ci ON ci.inspection_id = i.id GROUP BY i.equipment_id, ci.company_id) earliest ON earliest.equipment_id = i1.equipment_id AND earliest.company_id = ci1.company_id AND i1.date = earliest.earliest_date ) i ON i.equipment_id = e.id AND i.company_id = ce.company_id WHERE ce.company_id = ? AND e.rentable = 1 ORDER BY e.internal_id",
+            [domainId],
+            (error, result) => {
+              if (error) {
+                console.error(
+                  "/rent/allCompanyEquipment/rentable/" + req.params.domain + " : " + error
+                );
+                return res.status(500).json({
+                  status: 500,
+                  message: "Database Error Occured",
+                });
+              }
+              if (result.length > 0) {
+                console.log(
+                  "/equipment/allCompany/" + req.params.domain + " : Value Correct"
+                );
+                console.log(
+                  "/equipment/allUser : " +
+                  new Date(result[0].retirement_date).getTime()
+                );
+                let today = new Date();
+                let data = result.map((item) => ({
+                  id: item.internal_id,
+                  name: item.name,
+                  brand: item.brand,
+                  serial: item.serial,
+                  price: item.price,
+                  colour: item.colour,
+                  type_number: item.type,
+                  fabric_length: item.fabric_length,
+                  fabric_width: item.fabric_width,
+                  date_first_used: new Date(
+                    new Date(item.date_first_used).getTime() + 86400000 // 24 Hours
+                  )
+                    .toISOString()
+                    .split("T")[0],
+                  retirement_date: new Date(
+                    new Date(item.retirement_date).getTime() + 86400000 // 24 Hours
+                  )
+                    .toISOString()
+                    .split("T")[0],
+                  next_inspection_date:
+                    item.next_date != null
+                      ? new Date(item.next_date).toISOString().split("T")[0]
+                      : "N/A",
+                  status:
+                    item.status == 2
+                      ? 3
+                      : new Date(item.retirement_date).getTime() <=
+                        today.getTime() - 86400000 // 24 hours
+                        ? 3
+                        : 0,
+                  inspection_notes: item.details != "" ? item.details : "N/A",
+                  rentable: item.rentable === 1 ? true : false,
+                }));
+                return res.status(200).json({
+                  status: 200,
+                  message: "Success",
+                  value: data,
+                });
+              }
+            });
+        }
+        catch (error) {
+          console.error("Error fetching company equipment:", error);
+          res.status(500).json({ error: "Internal server error" });
+        }
+      }
+    }
+  );
+});
 
 module.exports = router;

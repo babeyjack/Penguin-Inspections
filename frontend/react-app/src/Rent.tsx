@@ -2,6 +2,7 @@ import { useState } from "react";
 import NavigationBar from "./components/Dashboard/NavigationBar";
 import Header from "./components/StandardComponents/Header";
 import Clients from "./components/Rent/Clients";
+import RentableItems from "./components/Rent/RentableItems";
 
 const Rent = () => {
   const navItems = [
@@ -63,7 +64,7 @@ const Rent = () => {
       </Header>
       <div>
         <>
-          {page == 1 && <p>Rentable Items</p>}
+          {page == 1 && <RentableItems />}
           {page == 2 && <p>Manage Orders</p>}
           {page == 3 && <Clients />}
           {page == 4 && <p>Create Orders</p>}
