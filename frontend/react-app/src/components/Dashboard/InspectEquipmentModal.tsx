@@ -99,6 +99,25 @@ const InspectEquipmentModal = ({
     const domain = getDomain();
     if (domain != "") fetchCommand = "/equipment/companyInspection/" + domain;
 
+    if(form.criteria.some((item) => item[1] == 2)) {
+      let newFetchCommand = "/equipment/userFailedInspection";
+      const domain = getDomain();
+      if (domain != "") newFetchCommand = "/equipment/companyFailedInspeciton/" + domain;
+
+      fetch(newFetchCommand, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ id: itemData.id }),
+      }).then((res) => res.json())
+      .then((data) => {
+        if(data.status == 200) {
+          console.log("Item Failed Inspection");
+        } else {
+          console.error("Failed Inspection : " + data.message);
+        }
+      })
+    }
 
     fetch(fetchCommand, {
       method: "POST",

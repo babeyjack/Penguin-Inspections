@@ -1843,6 +1843,161 @@ router.post("/companyEdit/:domain", isAuthenticated, (req, res) => {
   );
 });
 
+router.post("userFailedInspection", isAuthenticated, (req, res) => {
+  const userId = req.user?.id;
+  const id = req.body.id;
+  
+  db.beginTransaction((beginErr) => {
+    try{
+      if (beginErr) {
+        console.log("Transaction begin failed: " + beginErr);
+        return res
+          .status(500)
+          .json({ status: 500, message: "Transaction failed" });
+      }
+
+    db.query("SELECT * FROM user_equipment WHERE user_id = ? AND equipment_id = ?", [userId, id], 
+      (dataErr, dataRetr) => {
+      if (dataErr || !dataRetr || dataRetr.length !== 1) {
+        console.error("user_equipment check failed:", dataErr || "Not found");
+        return db.rollback(() => {
+          res.status(403).json({ status: 403, message: "Permission denied" });
+        });
+      }
+
+      if(dataRetr != 0)
+      {
+        db.query("SELECT * FROM inspection WHERE equipment_id = ? ORDER BY date DESC LIMIT 1", [id],
+          (inspectionErr, inspectionRetr) => {
+            if (inspectionErr || !inspectionRetr || inspectionRetr.length === 0) {
+              console.error("inspection fetch failed:", inspectionErr || "Not found");
+              return db.rollback(() => {
+                res.status(404).json({ status: 404, message: "Inspection not found" });
+              });
+            }
+
+          if(inspectionRetr.length > 0) {
+            req.body.external_id = inspectionRetr[0].equipment_id;
+            req.body.id = inspectionRetr[0].id;
+            req.body.name = inspectionRetr[0].name;
+            req.body.type = inspectionRetr[0].type;
+            req.body.manufacturer = inspectionRetr[0].manufacturer;
+            req.body.serial = inspectionRetr[0].serial;
+            req.body.price = inspectionRetr[0].price;
+            req.body.colour = inspectionRetr[0].colour;
+            req.body.firstUseDate = inspectionRetr[0].first_use_date;
+            req.body.retirementDate = new Date().yyyymmdd();
+            req.body.fabricLength = inspectionRetr[0].fabric_length;
+            req.body.fabricWidth = inspectionRetr[0].fabric_width;
+          }
+        });
+      }
+    });
+
+    } catch(error){
+      console.error("Error retrieving inspection data:", error);
+      return db.rollback(() => {
+        res.status(500).json({ status: 500, message: "Database Error Occurred" });
+      })  
+    };
+
+  console.log("Inspection retrieval successful.");
+  res.url = "/userEdit";
+  next();
+  });
+});
+
+router.post("companyFailedInspection/:domain", isAuthenticated, (req, res) => {
+  const companyId = req.user?.id;
+  const id = req.body.id;
+  if (!userId) {
+    return res.status(401).json({ status: 401, message: "Unauthorized" });
+  }
+  
+    let domainId = 0;
+  db.query(
+    "SELECT id FROM company WHERE domain_name = ?",
+    [req.params.domain],
+    (domainErr, domainRes) => {
+      if (domainErr) {
+        console.log(
+          "//equipment/companyInspection/" +
+            req.params.domain +
+            " : " +
+            domainErr
+        );
+        return res.status(500).json({
+          status: 500,
+          message: "Domain Not Found",
+        });
+      }
+      if (domainRes.length > 0) {
+        domainId = domainRes[0].id;
+        console.log(
+          "/equipment/companyInspection/" + req.params.domain + " : " + domainId
+        );
+      }
+  db.beginTransaction((beginErr) => {
+    try{
+      if (beginErr) {
+        console.log("Transaction begin failed: " + beginErr);
+        return res
+          .status(500)
+          .json({ status: 500, message: "Transaction failed" });
+      }
+
+    db.query("SELECT * FROM company_equipment WHERE company_id = ? AND equipment_id = ?", [domainId, id], 
+      (dataErr, dataRetr) => {
+      if (dataErr || !dataRetr || dataRetr.length !== 1) {
+        console.error("user_equipment check failed:", dataErr || "Not found");
+        return db.rollback(() => {
+          res.status(403).json({ status: 403, message: "Permission denied" });
+        });
+      }
+
+      if(dataRetr != 0)
+      {
+        db.query("SELECT * FROM inspection WHERE equipment_id = ? ORDER BY date DESC LIMIT 1", [id],
+          (inspectionErr, inspectionRetr) => {
+            if (inspectionErr || !inspectionRetr || inspectionRetr.length === 0) {
+              console.error("inspection fetch failed:", inspectionErr || "Not found");
+              return db.rollback(() => {
+                res.status(404).json({ status: 404, message: "Inspection not found" });
+              });
+            }
+
+          if(inspectionRetr.length > 0) {
+            req.body.external_id = inspectionRetr[0].equipment_id;
+            req.body.id = inspectionRetr[0].id;
+            req.body.name = inspectionRetr[0].name;
+            req.body.type = inspectionRetr[0].type;
+            req.body.manufacturer = inspectionRetr[0].manufacturer;
+            req.body.serial = inspectionRetr[0].serial;
+            req.body.price = inspectionRetr[0].price;
+            req.body.colour = inspectionRetr[0].colour;
+            req.body.firstUseDate = inspectionRetr[0].first_use_date;
+            req.body.retirementDate = new Date().yyyymmdd();
+            req.body.fabricLength = inspectionRetr[0].fabric_length;
+            req.body.fabricWidth = inspectionRetr[0].fabric_width;
+          }
+        });
+      }
+    });
+
+    } catch(error){
+      console.error("Error retrieving inspection data:", error);
+      return db.rollback(() => {
+        res.status(500).json({ status: 500, message: "Database Error Occurred" });
+      })  
+    };
+  });
+
+  console.log("Inspection retrieval successful.");
+  res.url = "/userEdit";
+  next();
+  });
+});
+
 router.delete("/userDelete/:id", isAuthenticated, (req, res) => {
   const userId = req.user?.id;
   const id = req.params.id;
