@@ -1255,10 +1255,10 @@ router.post("/userInspection", isAuthenticated, (req, res) => {
   for (let i = 0; i < criteria.length; i++) {
     if (criteria[i][1] == 1 && status == 0) {
       nextInspectionModifier = 2628000000;
-      status == 1;
-    } else if (criteria[i][1] == 2 && status != 2);
-    {
-      status == 2;
+      status = 1;
+    } else if (criteria[i][1] == 2 && status != 2) {
+      nextInspectionModifier = 0;
+      status = 2;
       break;
     }
   }
@@ -1386,10 +1386,10 @@ router.post("/companyInspection/:domain", isAuthenticated, (req, res) => {
   for (let i = 0; i < criteria.length; i++) {
     if (criteria[i][1] == 1 && status == 0) {
       nextInspectionModifier = 2628000000;
-      status == 1;
-    } else if (criteria[i][1] == 2 && status != 2);
-    {
-      status == 2;
+      status = 1;
+    } else if (criteria[i][1] == 2 && status != 2) {
+      nextInspectionModifier = 0;
+      status = 2;
       break;
     }
   }
